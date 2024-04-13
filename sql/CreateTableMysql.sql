@@ -1,8 +1,7 @@
 create table Site(
     siteID int auto_increment PRIMARY KEY,
     siteUrl varchar(255) not null,
-    siteJSON json not null,
-    motID int 
+    siteJSON json not null
 );
 
 create table Mots(
@@ -23,4 +22,12 @@ create table SiteMots(
     FOREIGN KEY (siteID) REFERENCES Site(siteID),
     FOREIGN KEY (motID) REFERENCES Mots(motID)
 );
+
+create table FileUrl(
+    fileID int auto_increment PRIMARY KEY,
+    url varchar(255),
+    fileTraite boolean default false,
+    UNIQUE (url)
+);
+
 

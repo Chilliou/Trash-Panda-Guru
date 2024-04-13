@@ -1,0 +1,1 @@
+insert into FileUrl(fileURL) values("https://fr.wikipedia.org/wiki/Raton_laveur");
