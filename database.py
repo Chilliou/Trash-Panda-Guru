@@ -7,7 +7,7 @@ class Database:
         self.connection = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="toor",
+            password="YourRootPassword",
             database="gogoRaccoon",
             port=4448
         )
@@ -29,18 +29,73 @@ class Database:
         return count
     
     
-    def get_all_sites(self):
-        sites = []
-        cursor = self.connection.cursor()
-        cursor.execute("SELECT SiteURL, SiteTitre, SiteJSON FROM Site")
-        for row in cursor:
-            url, title, json_data = row
-            data = json.loads(json_data)
-            site = Crawler(url, data["title"], data["h1"], data["meta"], data["text"])
-            sites.append(site)
-        cursor.close()
-        return sites
+    
+    def insert_mot_site(self, siteMot):
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute("SELECT SiteID FROM Site where siteUrl=%s", (siteMot.site_url,))
+            siteId = cursor.fetchone()[0]
+            cursor.execute("SELECT motID FROM Mots where mot=%s", (siteMot.mot,))
+            motId = cursor.fetchone()[0]
+            query = "INSERT IGNORE INTO SiteMots (siteID, motID, nbOccurence, tf, idf) VALUES (%s, %s, %s, %s, %s)"
+            val = (siteId, motId, siteMot.nbOccurence, siteMot.tf, siteMot.idf)
+            cursor.execute(query, val)
+            self.connection.commit()
+            cursor.close()
+        except Exception as e:
+            print(f"Error insert_mot_site: {e}")
     """
+
+    def insert_mot_site(self, siteMot):
+        cursor = self.connection.cursor()
+        query = "INSERT IGNORE INTO SiteMots (siteID, motID, nbOccurence, tf, idf) VALUES (%s, %s, %s, %s, %s)"
+        val = (self.get_site_id(siteMot.site_url), self.get_mot_id(siteMot.mot), siteMot.nbOccurence, siteMot.tf, siteMot.idf)
+        cursor.execute(query, val)
+        cursor.close()  # Close the cursor
+        self.connection.commit()
+       
+
+    def execute_query(self, query, params=None):
+        with self.connection.cursor() as cursor:
+            cursor.execute(query, params)
+            results = cursor.fetchall()
+        return results
+
+    def get_mot_id(self, mot):
+        query = "SELECT motID FROM Mots WHERE mot=%s"
+        results = self.execute_query(query, (mot,))
+        if results:
+            return results[0][0]  # Return the first element of the first tuple
+        else:
+            return None
+
+    def get_site_id(self, site_url):
+        query = "SELECT SiteID FROM Site WHERE siteUrl=%s"
+        results = self.execute_query(query, (site_url,))
+        if results:
+            return results[0][0]  # Return the first element of the first tuple
+        else:
+            return None
+
+
+    def get_all_sites(self):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT SiteURL, SiteJSON FROM Site")
+        result = cursor.fetchall()
+        cursor.close()
+        return result
+
+    def get_all_mots(self):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT mot FROM Mots")
+        result = cursor.fetchall()
+        cursor.close()    
+        mots = []
+        for row in result:
+            if isinstance(row[0], str):
+                mots.append(row[0])
+
+        return mots
 
     def insert_site(self, site):
         cursor = self.connection.cursor()

@@ -76,12 +76,13 @@ class Crawler:
         }
     
     def __str__(self) -> str:
-        return f"{self.url} - {self.title} - {self.h1} - {self.meta} - {self.text}"
+        return f"{self.url} - {self.title}"
     
-    
+""" 
 bdd = Database();
 list_url = bdd.get_file_url()
 
 crawler = Crawler(list_url=list_url)
 while True:
     crawler.crawl()
+"""
