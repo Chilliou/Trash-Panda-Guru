@@ -11,40 +11,6 @@ class Database:
             database="gogoRaccoon",
             port=4448
         )
-    """""
-    def insert_data(self):
-        count = 0
-        if self.waiting_list:
-            url = self.waiting_list.pop(0)
-            site = Crawler(url)
-            if site.crawl():
-                cursor = self.connection.cursor()
-                cursor.execute("INSERT INTO Site (SiteURL, SiteTitre, SiteJSON) VALUES (%s, %s, %s)", (site.url, site.title, json.dumps(site.to_json())))
-                self.waiting_list.extend(site.all_urls)
-                self.connection.commit()
-                cursor.close()
-                count += 1
-        else:
-            print("Waiting list is empty.")
-        return count
-    
-    
-    
-    def insert_mot_site(self, siteMot):
-        try:
-            cursor = self.connection.cursor()
-            cursor.execute("SELECT SiteID FROM Site where siteUrl=%s", (siteMot.site_url,))
-            siteId = cursor.fetchone()[0]
-            cursor.execute("SELECT motID FROM Mots where mot=%s", (siteMot.mot,))
-            motId = cursor.fetchone()[0]
-            query = "INSERT IGNORE INTO SiteMots (siteID, motID, nbOccurence, tf, idf) VALUES (%s, %s, %s, %s, %s)"
-            val = (siteId, motId, siteMot.nbOccurence, siteMot.tf, siteMot.idf)
-            cursor.execute(query, val)
-            self.connection.commit()
-            cursor.close()
-        except Exception as e:
-            print(f"Error insert_mot_site: {e}")
-    """
 
     def insert_mot_site(self, siteMot):
         cursor = self.connection.cursor()
@@ -133,13 +99,3 @@ class Database:
         self.connection.commit()
         cursor.close()
 
-
-"""
-dt = Database()
-total_iterations = 0
-for _ in range(1000):
-    count = dt.insert_data()
-    total_iterations += count
-    print(f"Iteration {_+1}: {count} sites added.")
-print(f"Total iterations: {total_iterations}")
-"""
